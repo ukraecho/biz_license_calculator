@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A.Dot Biz 라이선스 산출기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f0f2f8;
+  --surface: #ffffff;
+  --ink: #0f172a;
+  --ink2: #334155;
+  --ink3: #64748b;
+  --line: #e2e8f0;
+  --accent: #2563eb;
+  --accent-light: #eff6ff;
+  --green: #059669;
+  --green-light: #ecfdf5;
+  --orange: #ea580c;
+  --sans: 'Noto Sans KR', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+body { font-family: var(--sans); background: var(--bg); color: var(--ink); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+.header { background: var(--ink); padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; }
+.logo { font-size: 15px; font-weight: 700; color: #fff; }
+.logo span { color: #60a5fa; }
+.header-sub { font-size: 12px; color: #64748b; }
+
+.wrap { max-width: 1060px; margin: 0 auto; padding: 28px 24px 80px; }
+.grid { display: grid; grid-template-columns: 360px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 740px) { .grid { grid-template-columns: 1fr; } }
+
+.card { background: var(--surface); border-radius: 14px; padding: 26px; border: 1px solid var(--line); }
+.card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink3); margin-bottom: 18px; }
+
+.input-label { font-size: 13.5px; font-weight: 600; color: var(--ink2); margin-bottom: 8px; }
+.input-wrap { position: relative; margin-bottom: 18px; }
+.input-wrap input[type="number"] {
+  width: 100%; padding: 13px 56px 13px 14px;
+  font-size: 22px; font-family: var(--mono); font-weight: 600;
+  border: 2px solid var(--line); border-radius: 10px;
+  color: var(--ink); background: var(--bg); outline: none;
+  transition: border-color .2s;
+  -moz-appearance: textfield;
+}
+.input-wrap input::-webkit-inner-spin-button,
+.input-wrap input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.input-wrap input:focus { border-color: var(--accent); background: #fff; }
+.input-unit { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--ink3); font-weight: 500; }
+
+input[type="range"] {
+  -webkit-appearance: none; width: 100%; height: 6px;
+  border-radius: 3px; background: var(--line); outline: none; cursor: pointer; margin-bottom: 6px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 6px #2563eb44; cursor: pointer;
+}
+.slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--ink3); font-family: var(--mono); margin-bottom: 18px; }
+
+.quick-btns { display: flex; flex-wrap: wrap; gap: 7px; }
+.qbtn {
+  padding: 6px 13px; font-size: 12px; font-weight: 600;
+  border-radius: 6px; border: 1.5px solid var(--line);
+  color: var(--ink2); background: var(--bg); cursor: pointer;
+  font-family: var(--sans); transition: all .15s;
+}
+.qbtn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.qbtn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+/* result */
+.result-hero {
+  background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+  border-radius: 12px; padding: 26px 28px; color: #fff; margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+.result-hero::before {
+  content: ''; position: absolute; right: -30px; top: -30px;
+  width: 130px; height: 130px; border-radius: 50%; background: #ffffff0c;
+}
+.result-hero-label { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #93c5fd; margin-bottom: 6px; }
+.result-hero-amount { font-size: 36px; font-family: var(--mono); font-weight: 600; letter-spacing: -.02em; line-height: 1.1; margin-bottom: 4px; }
+.result-hero-sub { font-size: 13px; color: #bfdbfe; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; text-align: center; }
+.stat-value { font-size: 19px; font-family: var(--mono); font-weight: 600; color: var(--ink); margin-bottom: 4px; line-height: 1.2; }
+.stat-value.green { color: var(--green); }
+.stat-value.orange { color: var(--orange); }
+.stat-label { font-size: 11px; color: var(--ink3); line-height: 1.4; }
+
+.card2 { background: var(--surface); border-radius: 14px; padding: 24px 26px; border: 1px solid var(--line); }
+
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.bar-label { width: 50px; font-size: 11px; color: var(--ink3); font-family: var(--mono); flex-shrink: 0; text-align: right; }
+.bar-track { flex: 1; height: 22px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width .5s cubic-bezier(.4,0,.2,1); display: flex; align-items: center; padding-left: 8px; }
+.bar-fill span { font-size: 10px; font-family: var(--mono); font-weight: 600; color: rgba(255,255,255,.9); white-space: nowrap; }
+.bar-amt { width: 86px; font-size: 11px; font-family: var(--mono); color: var(--ink2); text-align: right; flex-shrink: 0; }
+
+.bc1{background:#2563eb} .bc2{background:#0284c7} .bc3{background:#0891b2}
+.bc4{background:#059669} .bc5{background:#65a30d} .bc6{background:#ca8a04}
+.bc7{background:#ea580c} .bc8{background:#dc2626} .bc9{background:#9333ea} .bc10{background:#db2777}
+
+.dtable { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 16px; }
+.dtable th { padding: 8px 12px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ink3); background: var(--bg); border-bottom: 1px solid var(--line); }
+.dtable th:last-child { text-align: right; }
+.dtable td { padding: 9px 12px; border-bottom: 1px solid var(--line); color: var(--ink2); }
+.dtable td:last-child { text-align: right; font-family: var(--mono); font-weight: 600; color: var(--ink); }
+.dtable tr:last-child td { border-bottom: none; }
+.tbadge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-family: var(--mono); background: var(--green-light); color: var(--green); margin-right: 4px; }
+
+.savings-box { background: var(--green-light); border: 1px solid #bbf7d0; border-radius: 10px; padding: 15px 18px; display: flex; align-items: center; justify-content: space-between; margin-top: 14px; flex-wrap: wrap; gap: 6px; }
+.savings-box .sl { font-size: 13px; color: #065f46; font-weight: 500; }
+.savings-box .sv { font-size: 17px; font-family: var(--mono); font-weight: 700; color: var(--green); }
+
+/* tier reference table */
+.tier-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tier-table th { padding: 8px 10px; text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--ink3); background: var(--bg); border-bottom: 1px solid var(--line); }
+.tier-table th:last-child { text-align: right; }
+.tier-table td { padding: 9px 10px; border-bottom: 1px solid var(--line); color: var(--ink2); vertical-align: middle; }
+.tier-table td:last-child { text-align: right; font-family: var(--mono); font-weight: 600; }
+.tier-table tr:last-child td { border-bottom: none; }
+.tier-table tr.tr-active { background: var(--accent-light); }
+.tier-table tr.tr-active td { color: var(--ink); }
+.tier-table tr.tr-inactive td { color: #cbd5e1; }
+.t-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; font-family: var(--mono); margin-right: 4px; }
+.tb-on  { background: var(--accent-light); color: var(--accent); }
+.tb-cur { background: #fef9c3; color: #92400e; }
+.tb-off { background: var(--bg); color: #cbd5e1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">A.<span>Dot</span> Biz &nbsp;<span style="font-weight:300;color:#475569;">라이선스 산출기</span></div>
+  <div class="header-sub">Volume Discount 구간별 자동 계산</div>
+</div>
+
+<div class="wrap">
+  <div class="grid">
+
+    <!-- LEFT -->
+    <div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">라이선스 설정</div>
+
+        <div class="input-label">라이선스 수 (구성원 수)</div>
+        <div class="input-wrap">
+          <input type="number" id="userInput" value="1000" min="1" max="50000" oninput="onInputChange()">
+          <div class="input-unit">명</div>
+        </div>
+
+        <input type="range" id="slider" min="1" max="25000" value="1000" oninput="onSliderChange()">
+        <div class="slider-labels"><span>1명</span><span>5,000</span><span>10,000</span><span>25,000+</span></div>
+
+        <div class="input-label" style="margin-bottom:10px;">빠른 선택</div>
+        <div class="quick-btns">
+          <button class="qbtn" onclick="setCount(100,this)">100명</button>
+          <button class="qbtn" onclick="setCount(500,this)">500명</button>
+          <button class="qbtn active" onclick="setCount(1000,this)">1,000명</button>
+          <button class="qbtn" onclick="setCount(3000,this)">3,000명</button>
+          <button class="qbtn" onclick="setCount(5000,this)">5,000명</button>
+          <button class="qbtn" onclick="setCount(10000,this)">10,000명</button>
+          <button class="qbtn" onclick="setCount(20000,this)">20,000명</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">구간별 할인율 기준표</div>
+        <table class="tier-table" id="tierRef"></table>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div id="resultPanel"></div>
+
+  </div>
+</div>
+
+<script>
+const TIERS = [
+  { n:1,  start:1,     end:500,   price:28000, disc:0   },
+  { n:2,  start:501,   end:1000,  price:27300, disc:2.5 },
+  { n:3,  start:1001,  end:2000,  price:26600, disc:5   },
+  { n:4,  start:2001,  end:3000,  price:25900, disc:7.5 },
+  { n:5,  start:3001,  end:4000,  price:25200, disc:10  },
+  { n:6,  start:4001,  end:6000,  price:23800, disc:15  },
+  { n:7,  start:6001,  end:8000,  price:22400, disc:20  },
+  { n:8,  start:8001,  end:10000, price:21000, disc:25  },
+  { n:9,  start:10001, end:20000, price:14000, disc:50  },
+  { n:10, start:20001, end:null,  price:2800,  disc:90  },
+];
+const COLORS = ['bc1','bc2','bc3','bc4','bc5','bc6','bc7','bc8','bc9','bc10'];
+const BASE = 28000;
+
+function fmt(n) { return Math.round(n).toLocaleString('ko-KR'); }
+function fmtM(w) {
+  if (w >= 1e8) { const v = w/1e8; return v % 1 === 0 ? v+'억원' : v.toFixed(2).replace(/\.?0+$/,'')+'억원'; }
+  if (w >= 1e4) return fmt(Math.round(w/1e4))+'만원';
+  return fmt(w)+'원';
+}
+
+function breakdown(count) {
+  let rem = count, total = 0;
+  const rows = [];
+  for (const t of TIERS) {
+    if (rem <= 0) { rows.push({t, users:0, cost:0, state:'off'}); continue; }
+    const size = t.end ? t.end - t.start + 1 : Infinity;
+    const used = Math.min(rem, size);
+    const cost = used * t.price;
+    total += cost;
+    const state = used < size ? 'cur' : 'on';
+    rows.push({t, users:used, cost, state});
+    rem -= used;
+  }
+  return {rows, total};
+}
+
+function renderTierRef(count) {
+  const {rows} = breakdown(count);
+  document.getElementById('tierRef').innerHTML =
+    '<thead><tr><th>구간</th><th>인원 범위</th><th>할인율</th><th>단가(원/월)</th></tr></thead><tbody>' +
+    rows.map(r => {
+      const endStr = r.t.end ? fmt(r.t.end) : '~';
+      const cls = r.state === 'off' ? 'tr-inactive' : (r.state === 'cur' ? 'tr-active' : '');
+      const badge = r.state === 'off'
+        ? '<span class="t-badge tb-off">-</span>'
+        : r.state === 'cur'
+          ? '<span class="t-badge tb-cur">현재</span>'
+          : '<span class="t-badge tb-on">✓</span>';
+      return '<tr class="' + cls + '"><td>' + badge + r.t.n + '구간</td>' +
+        '<td style="font-family:var(--mono)">' + fmt(r.t.start) + ' ~ ' + endStr + '</td>' +
+        '<td style="font-family:var(--mono);color:var(--green);font-weight:600">' + r.t.disc + '%</td>' +
+        '<td>' + fmt(r.t.price) + '</td></tr>';
+    }).join('') + '</tbody>';
+}
+
+function renderResult(count) {
+  if (!count || count <= 0) {
+    document.getElementById('resultPanel').innerHTML =
+      '<div style="text-align:center;padding:60px 20px;color:var(--ink3)"><div style="font-size:40px;margin-bottom:12px">🧮</div><p style="font-size:14px">라이선스 수를 입력하세요</p></div>';
+    return;
+  }
+
+  const {rows, total} = breakdown(count);
+  const listTotal = count * BASE;
+  const savings = listTotal - total;
+  const effRate = total / count;
+  const discPct = (savings / listTotal * 100);
+  const activeRows = rows.filter(r => r.state !== 'off');
+  const maxCost = Math.max(...activeRows.map(r => r.cost));
+
+  let barsHtml = activeRows.map(r => {
+    const pct = (r.cost / maxCost * 100).toFixed(1);
+    const showLabel = parseFloat(pct) > 18;
+    return '<div class="bar-row">' +
+      '<div class="bar-label">' + r.t.n + '구간</div>' +
+      '<div class="bar-track"><div class="bar-fill ' + COLORS[r.t.n-1] + '" style="width:' + pct + '%">' +
+      (showLabel ? '<span>' + fmt(r.users) + '명</span>' : '') +
+      '</div></div>' +
+      '<div class="bar-amt">' + fmtM(r.cost) + '</div>' +
+      '</div>';
+  }).join('');
+
+  let tableRowsHtml = activeRows.map(r =>
+    '<tr><td><span class="tbadge">' + r.t.n + '구간</span></td>' +
+    '<td style="font-family:var(--mono)">' + fmt(r.users) + '명</td>' +
+    '<td style="font-family:var(--mono)">' + fmt(r.t.price) + '원</td>' +
+    '<td>' + fmtM(r.cost) + '</td></tr>'
+  ).join('');
+
+  tableRowsHtml +=
+    '<tr style="border-top:2px solid var(--line)">' +
+    '<td colspan="3" style="font-weight:700;color:var(--ink)">합계</td>' +
+    '<td style="font-family:var(--mono);font-weight:700;color:var(--accent)">' + fmtM(total) + '</td></tr>';
+
+  document.getElementById('resultPanel').innerHTML =
+    '<div class="result-hero">' +
+      '<div class="result-hero-label">월 청구금액 · ' + fmt(count) + '명 기준</div>' +
+      '<div class="result-hero-amount">' + fmtM(total) + '</div>' +
+      '<div class="result-hero-sub">연간 환산 ' + fmtM(total * 12) + '</div>' +
+    '</div>' +
+
+    '<div class="stats">' +
+      '<div class="stat"><div class="stat-value">' + fmt(effRate) + '원</div><div class="stat-label">인당 실효 단가<br>(원/월)</div></div>' +
+      '<div class="stat"><div class="stat-value green">' + discPct.toFixed(1) + '%</div><div class="stat-label">정가 대비<br>총 할인율</div></div>' +
+      '<div class="stat"><div class="stat-value orange">' + fmtM(savings) + '</div><div class="stat-label">정가 대비<br>월 절감액</div></div>' +
+    '</div>' +
+
+    '<div class="card2">' +
+      '<div class="card-title">구간별 비용 분해</div>' +
+      barsHtml +
+      '<table class="dtable"><thead><tr><th>구간</th><th>적용 인원</th><th>단가</th><th>구간 소계</th></tr></thead><tbody>' +
+      tableRowsHtml +
+      '</tbody></table>' +
+      '<div class="savings-box">' +
+        '<div class="sl">💰 정가(' + fmtM(listTotal) + ') 대비 절감액</div>' +
+        '<div class="sv">-' + fmtM(savings) + ' / 월</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function calculate() {
+  const count = parseInt(document.getElementById('userInput').value) || 0;
+  renderTierRef(count);
+  renderResult(count);
+}
+
+function onInputChange() {
+  const v = parseInt(document.getElementById('userInput').value) || 0;
+  document.getElementById('slider').value = Math.min(v, 25000);
+  document.querySelectorAll('.qbtn').forEach(b => b.classList.remove('active'));
+  calculate();
+}
+
+function onSliderChange() {
+  const v = document.getElementById('slider').value;
+  document.getElementById('userInput').value = v;
+  document.querySelectorAll('.qbtn').forEach(b => b.classList.remove('active'));
+  calculate();
+}
+
+function setCount(n, btn) {
+  document.getElementById('userInput').value = n;
+  document.getElementById('slider').value = Math.min(n, 25000);
+  document.querySelectorAll('.qbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  calculate();
+}
+
+calculate();
+</script>
+</body>
+</html>
